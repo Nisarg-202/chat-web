@@ -1,23 +1,23 @@
-import React, {useEffect, useState} from 'react';
-import {io} from 'socket.io-client';
+import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 let socket;
 
 function ChatPage({
   location: {
-    state: {name, room},
+    state: { name, room },
   },
   history,
 }) {
-  const [typing, setTyping] = useState('');
+  const [typing, setTyping] = useState("");
   const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
-  const END_POINT = 'https://desolate-basin-86208.herokuapp.com';
+  const END_POINT = process.env.REACT_APP_SERVER_URL;
   useEffect(
     function () {
       socket = io(END_POINT);
-      socket.emit('details', {name, room});
+      socket.emit("details", { name, room });
       return function () {
         socket.disconnect();
       };
@@ -27,56 +27,56 @@ function ChatPage({
   useEffect(
     function () {
       if (message.length > 0) {
-        socket.emit('typing', {name, room, message: name + ' is typing ...'});
+        socket.emit("typing", { name, room, message: name + " is typing ..." });
       } else {
-        socket.emit('typing', {name, room, message: ''});
+        socket.emit("typing", { name, room, message: "" });
       }
     },
     [message.length]
   );
   useEffect(function () {
-    socket.on('typing', function ({message}) {
+    socket.on("typing", function ({ message }) {
       setTyping(message);
     });
   }, []);
   useEffect(function () {
-    socket.on('details', function ({name, room, condition}) {
+    socket.on("details", function ({ name, room, condition }) {
       if (condition) {
-        socket.emit('welcome', {message: 'Welcome', room, name});
+        socket.emit("welcome", { message: "Welcome", room, name });
       } else {
-        alert('Please Take another name!');
-        history.push('/');
+        alert("Please Take another name!");
+        history.push("/");
       }
     });
   }, []);
   useEffect(
     function () {
-      socket.on('join user', function ({name, message}) {
-        setMessages([...messages, {name, message}]);
+      socket.on("join user", function ({ name, message }) {
+        setMessages([...messages, { name, message }]);
       });
     },
     [messages]
   );
   useEffect(
     function () {
-      socket.on('welcome', function ({message, name}) {
-        setMessages([...messages, {name, message}]);
+      socket.on("welcome", function ({ message, name }) {
+        setMessages([...messages, { name, message }]);
       });
     },
     [messages]
   );
   useEffect(
     function () {
-      socket.on('message', function ({name, message}) {
-        setMessages([...messages, {name, message}]);
+      socket.on("message", function ({ name, message }) {
+        setMessages([...messages, { name, message }]);
       });
     },
     [messages]
   );
   useEffect(
     function () {
-      socket.on('left user', function ({name, message}) {
-        setMessages([...messages, {name, message}]);
+      socket.on("left user", function ({ name, message }) {
+        setMessages([...messages, { name, message }]);
       });
     },
     [messages]
@@ -86,8 +86,8 @@ function ChatPage({
   }
   function onHandleChange(e) {
     e.preventDefault();
-    socket.emit('message', {name, room, message});
-    setMessage('');
+    socket.emit("message", { name, room, message });
+    setMessage("");
   }
   return (
     <div className="container d-flex justify-content-center my-3">
@@ -98,7 +98,7 @@ function ChatPage({
           </div>
           <div
             className="card-body"
-            style={{height: '500px', overflowY: 'scroll'}}
+            style={{ height: "500px", overflowY: "scroll" }}
           >
             {messages.length > 0 &&
               messages.map(function (item) {
